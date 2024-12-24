@@ -10,5 +10,5 @@ import (
 func main() {
 	pretty.Print("Test Print All Files")
 	slog.Info("Test Print All Files")
-	files.PrintAllFiles("/home/jtrahan")
+	files.PrintAllFiles("/home/jtrahan/", true)
 }

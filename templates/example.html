@@ -1,0 +1,11 @@
+{{define "body"}}
+<h1>Roll your own fileserv</h1>
+<ul>
+	{{range .Files}}
+		<li>
+			<a href="/files/{{.RelativeName}}" download>{{.FullName}}</a>
+			({{if .IsDir}}Directory{{else}}{{.Size}} bytes{{end}})
+		</li>
+	{{end}}
+</ul>
+{{end}}

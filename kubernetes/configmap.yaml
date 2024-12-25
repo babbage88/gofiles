@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gofiles-env
+data:
+  .env: |
+    FILES_DIR=/mnt/files
+    LISTEN_PORT=8080

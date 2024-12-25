@@ -17,19 +17,30 @@ type TemplateData struct {
 }
 
 func serveFilesTemplate(w http.ResponseWriter, r *http.Request, scannedFiles []files.FileInfo) {
-	lp := filepath.Join("templates", "layout.html")
-	fp := filepath.Join("templates", "example.html")
-
-	tmpl, err := template.ParseFiles(lp, fp)
+	tmpl, err := template.ParseFiles(
+		filepath.Join("templates", "layout.html"),
+		filepath.Join("templates", "example.html"),
+	)
 	if err != nil {
-		http.Error(w, "Error loading templates", http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Error parsing templates: %v", err), http.StatusInternalServerError)
 		return
 	}
 
+	fmt.Println("Scanned Files:")
+	for _, file := range scannedFiles {
+		msg := fmt.Sprintf("FullName: %s, RelativeName: %s, Size: %d, IsDir: %v\n", file.FullName, file.RelativeName, file.Size, file.IsDir)
+		pretty.Print(msg)
+	}
+
+	// Prepare data
 	data := TemplateData{Files: scannedFiles}
+	fmt.Printf("TemplateData has %d files\n", len(data.Files))
+
+	// Render template
 	err = tmpl.ExecuteTemplate(w, "layout", data)
 	if err != nil {
-		http.Error(w, "Error rendering template", http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Error rendering template: %v", err), http.StatusInternalServerError)
+		return
 	}
 }
 

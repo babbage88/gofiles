@@ -1,11 +1,13 @@
 {{define "body"}}
 <h1>Roll your own fileserv</h1>
 <ul>
-	{{range .Files}}
-		<li>
-			<a href="/files/{{.RelativeName}}" download>{{.FullName}}</a>
-			({{if .IsDir}}Directory{{else}}{{.Size}} bytes{{end}})
-		</li>
-	{{end}}
+    {{range .Files}}
+    <li>
+        <a href="/files/{{.RelativeName}}" download>{{.RelativeName}}</a>
+        ({{if .IsDir}}Directory{{else}}{{.Size}} bytes{{end}})
+    </li>
+    {{else}}
+    <li>No files found.</li>
+    {{end}}
 </ul>
 {{end}}

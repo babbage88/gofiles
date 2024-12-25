@@ -1,26 +1,30 @@
 package main
 
 import (
+	"embed"
 	"fmt"
 	"html/template"
 	"net/http"
 	"os"
-	"path/filepath"
 
 	"github.com/babbage88/gofiles/internal/files"
 	"github.com/babbage88/gofiles/internal/pretty"
 	"github.com/joho/godotenv"
 )
 
+//go:embed all:templates
+var viewtmpl embed.FS
+
+//go:embed static/*
+var staticfs embed.FS
+
 type TemplateData struct {
 	Files []files.FileInfo
 }
 
 func serveFilesTemplate(w http.ResponseWriter, r *http.Request, scannedFiles []files.FileInfo) {
-	tmpl, err := template.ParseFiles(
-		filepath.Join("templates", "layout.html"),
-		filepath.Join("templates", "example.html"),
-	)
+	tmpl, err := template.New("layout").ParseFS(viewtmpl, "templates/*.html")
+
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error parsing templates: %v", err), http.StatusInternalServerError)
 		return
@@ -65,6 +69,8 @@ func main() {
 	pretty.Print(msg)
 
 	fs := http.FileServer(http.Dir(fdldir))
+	// Serve static files
+	http.Handle("/static/", http.FileServer(http.FS(staticfs)))
 	http.Handle("/files/", http.StripPrefix("/files/", fs))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		serveFilesTemplate(w, r, scanned)

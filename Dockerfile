@@ -21,10 +21,6 @@ WORKDIR /app
 # Copy the built binary from the builder
 COPY --from=builder /app/fileserver /app/fileserver
 
-# Copy any additional files (e.g., templates, CSS, etc.)
-COPY templates/ /app/templates/
-COPY main.css /app/
-
 # Expose the port your app runs on
 EXPOSE 8080
 

@@ -5,13 +5,18 @@ metadata:
   namespace: default
 spec:
   entryPoints:
-  - websecure
+    - websecure
   routes:
-  - match: Host(`filesrv.test.trahan.dev`)
-    kind: Rule
-    services:
-    - name: gofiles-svc
-      port: 80
+    - match: Host(`gofiles.test.trahan.dev`)
+      kind: Rule
+      services:
+        - name: gofiles-svc
+          port: 80
+    - match: Host(`filesrv.test.trahan.dev`)
+      kind: Rule
+      services:
+        - name: gofiles-svc
+          port: 80
   tls:
     secretName: test-trahan-cert
 ---
@@ -22,15 +27,15 @@ metadata:
   namespace: default
 spec:
   entryPoints:
-  - web
+    - web
   routes:
-  - match: HostRegexp(`{host:.+}`)
-    kind: Rule
-    services:
-    - name: noop
-      port: 443
-    middlewares:
-    - name: redirect-to-https
+    - match: HostRegexp(`{host:.+}`)
+      kind: Rule
+      services:
+        - name: noop
+          port: 443
+      middlewares:
+        - name: redirect-to-https
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware

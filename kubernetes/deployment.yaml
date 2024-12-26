@@ -16,14 +16,15 @@ spec:
     spec:
       containers:
       - name: gofiles
-        image: jtrahan88/gofiles:v0.0.1
+        image: docker.io/jtrahan88/gofiles:v0.0.1
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
         volumeMounts:
         - name: env-volume
           mountPath: /app/.env
           subPath: .env
-        - name: vfs-vol
+        - name: nfs-vol
           mountPath: /mnt/files
         resources:
           limits:
@@ -39,4 +40,6 @@ spec:
       - name: nfs-vol
         nfs:
           server: 10.0.0.8
-          path: /volume1/media
+          path: /mnt/trahan-nas
+      imagePullSecrets:
+      - name: regcred

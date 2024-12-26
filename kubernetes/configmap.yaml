@@ -4,5 +4,5 @@ metadata:
   name: gofiles-env
 data:
   .env: |
-    FILES_DIR=/mnt/files
+    FILES_DIR=/mnt/files/htfiles
     LISTEN_PORT=8080

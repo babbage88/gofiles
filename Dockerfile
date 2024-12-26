@@ -1,28 +1,48 @@
-# Build stage
-FROM golang:1.23.4 AS builder
+# syntax=docker/dockerfile:1
 
-WORKDIR /app
+ARG GO_VERSION=1.23.0
+FROM --platform=$BUILDPLATFORM golang:${GO_VERSION} AS build
+WORKDIR /src
 
-# Copy and download dependency using go mod
-COPY go.mod go.sum ./
-RUN go mod download
+# golang dependencies
+RUN --mount=type=cache,target=/go/pkg/mod/ \
+  --mount=type=bind,source=go.sum,target=go.sum \
+  --mount=type=bind,source=go.mod,target=go.mod \
+  go mod download -x
 
-# Copy the source code
-COPY . .
+# Target go version
+ARG TARGETARCH
 
-# Build the Go application
-RUN go build -o fileserver .
+# Build the application, using cache mount.
+
+RUN --mount=type=cache,target=/go/pkg/mod/ \
+  --mount=type=bind,target=. \
+  CGO_ENABLED=0 GOARCH=$TARGETARCH go build -o /bin/server ./
 
 # Final stage copy bin and install pre-requisites
 FROM alpine:latest AS final
 
 WORKDIR /app
 
-# Copy the built binary from the builder
-COPY --from=builder /app/fileserver /app/fileserver
+ARG UID=10001
+RUN adduser \
+  --disabled-password \
+  --gecos "" \
+  --home "/nonexistent" \
+  --shell "/sbin/nologin" \
+  --no-create-home \
+  --uid "${UID}" \
+  appuser 
 
-# Expose the port your app runs on
+RUN mkdir -p /mnt/files/ && \
+  chown -R appuser:appuser /app/ && \
+  chown -R appuser:appuser /mnt/files
+USER appuser
+
+# Copy the executable from the "build" stage.
+COPY --from=build /bin/server /app/
+
+# Expose the port that the application listens on.
 EXPOSE 8080
 
-# Command to run the executable
-CMD ["/app/fileserver"]
+ENTRYPOINT [ "/app/server" ]

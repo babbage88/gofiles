@@ -611,12 +611,20 @@ body {
   color: hsl(var(--foreground) / var(--tw-text-opacity, 1));
 }
 
+.flex {
+  display: flex;
+}
+
 .inline-flex {
   display: inline-flex;
 }
 
 .h-10 {
   height: 2.5rem;
+}
+
+.h-16 {
+  height: 4rem;
 }
 
 .items-center {

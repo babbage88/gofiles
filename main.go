@@ -22,9 +22,38 @@ type TemplateData struct {
 	Files []files.FileInfo
 }
 
+func serveFilesTemplateAndScan(w http.ResponseWriter, r *http.Request) {
+	path := os.Getenv("FILES_DIR")
+	scannedFiles, err := files.ListOnlyFiles(path)
+	if err != nil {
+		pretty.PrintError(err.Error())
+	}
+	tmpl, err := template.New("layout").ParseFS(viewtmpl, "templates/*.html")
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error parsing templates: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Println("Scanned Files:")
+	for _, file := range scannedFiles {
+		msg := fmt.Sprintf("FullName: %s, RelativeName: %s, Size: %d, IsDir: %v\n", file.FullName, file.RelativeName, file.Size, file.IsDir)
+		pretty.Print(msg)
+	}
+
+	// Prepare data
+	data := TemplateData{Files: scannedFiles}
+	fmt.Printf("TemplateData has %d files\n", len(data.Files))
+
+	// Render template
+	err = tmpl.ExecuteTemplate(w, "layout", data)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error rendering template: %v", err), http.StatusInternalServerError)
+		return
+	}
+}
+
 func serveFilesTemplate(w http.ResponseWriter, r *http.Request, scannedFiles []files.FileInfo) {
 	tmpl, err := template.New("layout").ParseFS(viewtmpl, "templates/*.html")
-
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error parsing templates: %v", err), http.StatusInternalServerError)
 		return
@@ -73,7 +102,7 @@ func main() {
 	http.Handle("/static/", http.FileServer(http.FS(staticfs)))
 	http.Handle("/files/", http.StripPrefix("/files/", fs))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		serveFilesTemplate(w, r, scanned)
+		serveFilesTemplateAndScan(w, r)
 	})
 
 	pretty.Print("Listening on " + srvport + "...")

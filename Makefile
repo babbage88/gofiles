@@ -10,7 +10,7 @@ tailwind:
 
 buildandpushimage: tailwind
 	docker buildx use gfilesbuilder
-	docker buildx build --platform linux/amd64 -t $(DOCKER_HUB_TEST)$(tag) . --push
+	docker buildx build --platform linux/amd64 -t $(DOCKER_HUB)$(tag) . --push
 
 run-local: tailwind
 	go run .

@@ -39,22 +39,22 @@ func WithListenAddr(s string) GoFileServerOption {
 
 func WithStaticFiles(e *embed.FS) GoFileServerOption {
 	return func(g *GoFileServer) {
-		g.StaticFiles = e
+		g.StaticFiles = *e
 	}
 }
 
 func WithTemplateFiles(e *embed.FS) GoFileServerOption {
 	return func(g *GoFileServer) {
-		g.TemplateFiles = e
+		g.TemplateFiles = *e
 	}
 }
 
 type GoFileServer struct {
-	FilesDir      string    `json:"filesDir"`
-	EnvFile       string    `json:"envFile"`
-	ListenAddr    string    `json:"listenAddr"`
-	StaticFiles   *embed.FS `json:"staticFs"`
-	TemplateFiles *embed.FS `json:"templateFs"`
+	FilesDir      string   `json:"filesDir"`
+	EnvFile       string   `json:"envFile"`
+	ListenAddr    string   `json:"listenAddr"`
+	StaticFiles   embed.FS `json:"staticFs"`
+	TemplateFiles embed.FS `json:"templateFs"`
 }
 
 func New(opts ...GoFileServerOption) *GoFileServer {
@@ -67,8 +67,8 @@ func New(opts ...GoFileServerOption) *GoFileServer {
 		EnvFile:       envFile,
 		FilesDir:      filesDir,
 		ListenAddr:    listAddr,
-		StaticFiles:   &staticfs,
-		TemplateFiles: &viewtmpl,
+		StaticFiles:   staticfs,
+		TemplateFiles: viewtmpl,
 	}
 
 	for _, opt := range opts {
@@ -79,7 +79,11 @@ func New(opts ...GoFileServerOption) *GoFileServer {
 }
 
 func NewFromEnv(e string) *GoFileServer {
-	g := &GoFileServer{EnvFile: e}
+	g := &GoFileServer{
+		EnvFile:       e,
+		TemplateFiles: viewtmpl,
+		StaticFiles:   staticfs,
+	}
 
 	err := godotenv.Load(e)
 	if err != nil {
@@ -110,33 +114,6 @@ func (g *GoFileServer) Start() {
 
 	pretty.Print("Listening on " + g.ListenAddr + "...")
 	err := http.ListenAndServe(g.ListenAddr, nil)
-	if err != nil {
-		pretty.PrintError(err.Error())
-	}
-}
-
-func configureServer() {
-	err := godotenv.Load(".env")
-	if err != nil {
-		msg := fmt.Sprint("Error loading .env file: ", err.Error())
-		pretty.PrintError(msg)
-	}
-	fdldir := os.Getenv("FILES_DIR")
-	srvport := fmt.Sprint(":", os.Getenv("LISTEN_PORT"))
-
-	pretty.Print(fdldir)
-	pretty.Print(srvport)
-
-	fs := http.FileServer(http.Dir(fdldir))
-	// Serve static files
-	http.Handle("/static/", http.FileServer(http.FS(staticfs)))
-	http.Handle("/files/", http.StripPrefix("/files/", fs))
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		serveTemplatesAndScanFiles(w, r)
-	})
-
-	pretty.Print("Listening on " + srvport + "...")
-	err = http.ListenAndServe(srvport, nil)
 	if err != nil {
 		pretty.PrintError(err.Error())
 	}

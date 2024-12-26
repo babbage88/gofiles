@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"fmt"
 	"net/http"
 	"os"
@@ -36,10 +37,24 @@ func WithListenAddr(s string) GoFileServerOption {
 	}
 }
 
+func WithStaticFiles(e *embed.FS) GoFileServerOption {
+	return func(g *GoFileServer) {
+		g.StaticFiles = e
+	}
+}
+
+func WithTemplateFiles(e *embed.FS) GoFileServerOption {
+	return func(g *GoFileServer) {
+		g.TemplateFiles = e
+	}
+}
+
 type GoFileServer struct {
-	FilesDir   string `json:"filesDir"`
-	EnvFile    string `json:"envFile"`
-	ListenAddr string `json:"listenAddr"`
+	FilesDir      string    `json:"filesDir"`
+	EnvFile       string    `json:"envFile"`
+	ListenAddr    string    `json:"listenAddr"`
+	StaticFiles   *embed.FS `json:"staticFs"`
+	TemplateFiles *embed.FS `json:"templateFs"`
 }
 
 func New(opts ...GoFileServerOption) *GoFileServer {
@@ -49,9 +64,11 @@ func New(opts ...GoFileServerOption) *GoFileServer {
 		listAddr = ":4100"
 	)
 	srv := &GoFileServer{
-		EnvFile:    envFile,
-		FilesDir:   filesDir,
-		ListenAddr: listAddr,
+		EnvFile:       envFile,
+		FilesDir:      filesDir,
+		ListenAddr:    listAddr,
+		StaticFiles:   &staticfs,
+		TemplateFiles: &viewtmpl,
 	}
 
 	for _, opt := range opts {
@@ -85,10 +102,10 @@ func NewFromEnv(e string) *GoFileServer {
 func (g *GoFileServer) Start() {
 	fs := http.FileServer(http.Dir(g.FilesDir))
 	// Serve static files
-	http.Handle("/static/", http.FileServer(http.FS(staticfs)))
+	http.Handle("/static/", http.FileServer(http.FS(g.StaticFiles)))
 	http.Handle("/files/", http.StripPrefix("/files/", fs))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		serveTemplatesAndScanFiles(w, r)
+		g.ServeTemplatesAndScanFiles(w, r)
 	})
 
 	pretty.Print("Listening on " + g.ListenAddr + "...")

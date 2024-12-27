@@ -795,11 +795,6 @@ body {
   background-color: rgb(229 231 235 / var(--tw-bg-opacity, 1));
 }
 
-.bg-primary {
-  --tw-bg-opacity: 1;
-  background-color: hsl(var(--primary) / var(--tw-bg-opacity, 1));
-}
-
 .p-3 {
   padding: 0.75rem;
 }
@@ -870,11 +865,6 @@ body {
   color: hsl(var(--primary) / var(--tw-text-opacity, 1));
 }
 
-.text-primary-foreground {
-  --tw-text-opacity: 1;
-  color: hsl(var(--primary-foreground) / var(--tw-text-opacity, 1));
-}
-
 .ring-offset-background {
   --tw-ring-offset-color: hsl(var(--background) / 1);
 }
@@ -899,10 +889,6 @@ body {
 .hover\:bg-gray-200:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(229 231 235 / var(--tw-bg-opacity, 1));
-}
-
-.hover\:bg-primary\/90:hover {
-  background-color: hsl(var(--primary) / 0.9);
 }
 
 .hover\:text-accent-foreground:hover {

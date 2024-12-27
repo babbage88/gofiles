@@ -19,7 +19,7 @@
           <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
         </svg>
         <div class="flex-1">
-          <div class="text-sm font-medium truncate">{{ .RelativeName }}</div>
+          <div class="text-sm font-medium truncate"><a href="/files/{{.RelativeName}}" download>{{.RelativeName}}{{ .RelativeName }}</a></div>
           <div class="text-xs text-gray-500 dark:text-gray-400">{{ .DisplaySize }}</div>
         </div>
         <div class="flex items-center gap-2">

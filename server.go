@@ -108,6 +108,7 @@ func (g *GoFileServer) Start() {
 	// Serve static files
 	http.Handle("/static/", http.FileServer(http.FS(g.StaticFiles)))
 	http.Handle("/files/", http.StripPrefix("/files/", fs))
+	http.Handle("/test/", http.FileServer(http.FS(testfile)))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		g.ServeTemplatesAndScanFiles(w, r)
 	})

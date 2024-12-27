@@ -1,0 +1,61 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: gofiles-route
+  namespace: default
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - match: Host(`gofiles.trahan.dev`)
+    kind: Rule
+    services:
+    - name: gofiles-svc
+      port: 80
+  - match: Host(`filesrv.trahan.dev`)
+    kind: Rule
+    services:
+    - name: gofiles-svc
+      port: 80
+  tls:
+    secretName: trahan-dev-cert
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: http-to-https
+  namespace: default
+spec:
+  entryPoints:
+  - web
+  routes:
+  - match: HostRegexp(`{host:.+}`)
+    kind: Rule
+    services:
+    - name: noop
+      port: 443
+    middlewares:
+    - name: redirect-to-https
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: redirect-to-https
+  namespace: default
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: add-headers
+  namespace: default
+spec:
+  headers:
+    customRequestHeaders:
+      X-Forwarded-Proto: "https"
+      X-Forwarded-Port: "443"
+    stsSeconds: 15768000
+    forceSTSHeader: true

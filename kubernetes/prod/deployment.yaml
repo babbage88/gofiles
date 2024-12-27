@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gofiles
+  labels:
+    app: gofiles
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gofiles
+  template:
+    metadata:
+      labels:
+        app: gofiles
+    spec:
+      containers:
+      - name: gofiles
+        image: docker.io/jtrahan88/gofiles:v0.0.2
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: env-volume
+          mountPath: /app/.env
+          subPath: .env
+        - name: nfs-vol
+          mountPath: /mnt/files
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+      volumes:
+      - name: env-volume
+        configMap:
+          name: gofiles-env
+      - name: nfs-vol
+        nfs:
+          server: 10.0.0.8
+          path: /mnt/trahan-nas
+      imagePullSecrets:
+      - name: regcred

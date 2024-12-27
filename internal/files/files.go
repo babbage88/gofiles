@@ -17,6 +17,29 @@ type FileInfo struct {
 	RelativeName string `json:"relativeName"` // Path relative to fdldir
 }
 
+func (f *FileInfo) DisplaySize() string {
+	if f.Size >= 1024 {
+		szval := f.Size / 1024
+		retVal := fmt.Sprintf("%.2f KB\n", float64(szval))
+		return retVal
+	}
+
+	if f.Size >= 1048576 {
+		szval := f.Size / 1048576
+		retVal := fmt.Sprintf("%.2f MB\n", float64(szval))
+		return retVal
+	}
+
+	if f.Size >= 1073741824 {
+		szval := f.Size / 1073741824
+		retVal := fmt.Sprintf("%.2f GB\n", float64(szval))
+		return retVal
+	}
+
+	return fmt.Sprintf("%.2f Bytes\n", float64(f.Size))
+
+}
+
 // ListFiles recursively lists all files and directories in the specified root path using WalkDir.
 func ListFiles(rootPath string) ([]FileInfo, error) {
 	var files []FileInfo

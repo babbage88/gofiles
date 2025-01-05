@@ -106,7 +106,7 @@ func NewFromEnv(e string) *GoFileServer {
 func (g *GoFileServer) Start() {
 	fs := http.FileServer(http.Dir(g.FilesDir))
 	// Serve static files
-	http.Handle("/static/", http.FileServer(http.FS(g.StaticFiles)))
+	http.Handle("/static/", http.FileServer(http.FS(staticfs)))
 	http.Handle("/files/", http.StripPrefix("/files/", fs))
 	http.Handle("/test/", http.FileServer(http.FS(testfile)))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

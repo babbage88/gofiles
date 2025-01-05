@@ -14,7 +14,6 @@ type TemplateData struct {
 }
 
 func (g *GoFileServer) ServeTemplatesAndScanFiles(w http.ResponseWriter, r *http.Request) {
-
 	scannedFiles, err := files.ListOnlyFiles(g.FilesDir)
 	if err != nil {
 		pretty.PrintError(err.Error())
@@ -22,7 +21,7 @@ func (g *GoFileServer) ServeTemplatesAndScanFiles(w http.ResponseWriter, r *http
 	msg := fmt.Sprintf("Total count: %d", len(scannedFiles))
 	pretty.Print(msg)
 
-	tmpl, err := template.New("layout").ParseFS(g.TemplateFiles, "templates/*.html")
+	tmpl, err := template.New("layout").ParseFS(viewtmpl, "templates/*.html")
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error parsing templates: %v", err), http.StatusInternalServerError)
 		return

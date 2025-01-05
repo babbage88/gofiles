@@ -12,5 +12,11 @@ buildandpushimage: tailwind
 	docker buildx use gfilesbuilder
 	docker buildx build --platform linux/amd64,linux/arm64 -t $(DOCKER_HUB)$(tag) . --push
 
+deploylocalk3: buildandpushimage
+	kubectl --kubeconfig ~/.kube/config-local rollout restart deployment gofiles
+
+deployprodk3: buildandpushimage
+	kubectl rollout restart deployment gofiles
+
 run-local: tailwind
 	go run .
